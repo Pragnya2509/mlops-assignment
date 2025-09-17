@@ -1,0 +1,91 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/preprocess.py
+    deps:
+    - path: data/raw.csv
+      hash: md5
+      md5: f2906818eda8fcfc8f8416557ab1e6df
+      size: 23873
+    - path: params.yaml
+      hash: md5
+      md5: 71895c02228e86f88ee397ba51ae634c
+      size: 503
+    - path: src/preprocess.py
+      hash: md5
+      md5: b5d6a72e0907322ece2f69ebc0b909a9
+      size: 2021
+    params:
+      params.yaml:
+        preprocessing.fill_missing: median
+        preprocessing.replace_zeros: true
+        preprocessing.scale: true
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 7078ab473bfbe7839ed915e21651bfcc
+      size: 24758
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 9efd894e04bdbad61b54f83e5c084131
+      size: 98746
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 9efd894e04bdbad61b54f83e5c084131
+      size: 98746
+    - path: params.yaml
+      hash: md5
+      md5: 71895c02228e86f88ee397ba51ae634c
+      size: 503
+    - path: src/train.py
+      hash: md5
+      md5: 4cf0e2e8d0d290cfecdae0e9eb4a040d
+      size: 1826
+    params:
+      params.yaml:
+        model.DecisionTreeClassifier:
+          criterion: entropy
+          max_depth: 6
+          min_samples_split: 2
+        model.RandomForestClassifier:
+          n_estimators: 500
+          max_depth: 10
+          min_samples_split: 4
+          n_jobs: -1
+        model.type: RandomForestClassifier
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: 2fbf4fff31368c6f6d185421db16c43f
+      size: 6107742
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 7078ab473bfbe7839ed915e21651bfcc
+      size: 24758
+    - path: models/model.pkl
+      hash: md5
+      md5: 2fbf4fff31368c6f6d185421db16c43f
+      size: 6107742
+    - path: params.yaml
+      hash: md5
+      md5: 71895c02228e86f88ee397ba51ae634c
+      size: 503
+    - path: src/evaluate.py
+      hash: md5
+      md5: ffdfaf3aab7dda55e73006fab37da155
+      size: 3367
+    outs:
+    - path: experiments/metrics.json
+      hash: md5
+      md5: 3655ccbbcd888be798b7819a5117e23b
+      size: 170
+    - path: experiments/plots.json
+      hash: md5
+      md5: 770a33c4fc896e1c8d7253e532934418
+      size: 1143

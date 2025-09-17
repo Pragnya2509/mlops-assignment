@@ -1,0 +1,54 @@
+stages:
+  preprocess:
+    cmd: python src/preprocess.py
+    deps:
+      - src/preprocess.py
+      - params.yaml
+      - data/raw.csv
+    params:
+      - preprocessing.scale
+      - preprocessing.replace_zeros
+      - preprocessing.fill_missing
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - params.yaml
+      - data/processed/train.csv
+    params:
+      - model.type
+      - model.DecisionTreeClassifier
+      - model.RandomForestClassifier
+    outs:
+      - models/model.pkl
+
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+      - src/evaluate.py
+      - models/model.pkl
+      - data/processed/test.csv
+      - params.yaml
+    metrics:
+      - experiments/metrics.json:
+          cache: false
+    plots:
+      - experiments/plots.json:
+          x: timestamp
+          y: accuracy
+      - experiments/plots.json:
+          x: timestamp
+          y: precision
+      - experiments/plots.json:
+          x: timestamp
+          y: recall
+      - experiments/plots.json:
+          x: timestamp
+          y: f1
+      - experiments/plots.json:
+          x: timestamp
+          y: roc_auc
